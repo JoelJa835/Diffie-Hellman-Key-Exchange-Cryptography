@@ -1,8 +1,13 @@
 CC=gcc  #compiler
+CFLAGS = -Wall
+LDFLAGS = -lgmp
+OBJFILES = dh_assign_1.o  
 TARGET=dh_assign_1 #target file name
  
-all:
-	$(CC) dh_assign_1.c -o $(TARGET) -lgmp
+all:$(TARGET)
+
+$(TARGET): $(OBJFILES)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJFILES) $(LDFLAGS)
  
 clean:
-	rm -rf *.o $(TARGET)
+	rm -rf $(OBJFILES) $(TARGET) *~

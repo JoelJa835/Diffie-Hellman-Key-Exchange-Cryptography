@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <ctype.h>
 
 int main(int argc, char *argv[] )  {  
    int opt;
@@ -20,32 +21,23 @@ int main(int argc, char *argv[] )  {
     // put ':' in the starting of the
     // string so that program can 
     //distinguish between '?' and ':' 
-    while((opt = getopt(argc, argv,":o:p:g:a:b:h:")) != -1) 
+    while((opt = getopt(argc, argv,":o:p:g:a:b:h")) != -1) 
     { 
         switch(opt) 
         { 
             case 'p': 
-                printf("option: %s\n", optarg);
                 mpz_set_str(p, optarg,10);
                 break;
             case 'g': 
-                printf("option: %s\n", optarg); 
                 mpz_set_str(g, optarg,10);
                 break;
-            case 'a': 
-                printf("option: %s\n", optarg); 
+            case 'a':  
                  mpz_set_str(a, optarg,10);
                 break;
             case 'b': 
-                printf("option: %s\n", optarg); 
                 mpz_set_str(b, optarg,10);
                 break;
-            case 'h': 
-                printf("option: %s\n", optarg); 
-
-                break; 
             case 'o': 
-                printf("filename: %s\n", optarg);
                 filename = (char *)malloc((strlen(optarg)+1)*sizeof(char));
                 if (filename == NULL){
                   puts("Memory allocation error.");
@@ -53,6 +45,9 @@ int main(int argc, char *argv[] )  {
                 }
                 strcpy(filename,optarg);
                 break; 
+            case 'h': 
+                printf("The argument -p will include the will be the public prime number.\nThe argument -g will be the public primitive root of the previous prime number.\nThe argument -a will be the private key of user A.\nThe argument -b will be the private key of user B.\nThe command line tool will return the public key of user A, the public key of user B, andthe shared secret. The output file must be in the following format:<public key A>, <public key B>, <shared secret>");
+                return 1;
             case ':': 
                 printf("option needs a value\n"); 
                 break; 
@@ -67,11 +62,15 @@ int main(int argc, char *argv[] )  {
         printf("extra arguments: %s\n", argv[optind]); 
     }
 
+
+//Calculating the values for alice and bob  that will be exchanged and then the shared message.
  mpz_powm(A,g,a,p);
  mpz_powm(B,g,b,p);
  mpz_powm(A_s,B,a,p);
  mpz_powm(B_s,A,b,p);
 
+
+//Checking if both the messages alice and bob received are the same.
  if(mpz_cmp(A_s,B_s) == 0){
    FILE *fp;
    fp = fopen(filename, "w");
@@ -80,8 +79,11 @@ int main(int argc, char *argv[] )  {
       printf("Error!");   
       exit(1);             
    }
+   //Write values to output file.
    gmp_fprintf(fp,"<%Zd>, <%Zd>, <%Zd>",A, B, A_s);
    fclose(fp);
+   
+   //Free the space occupied.
    mpz_clear(p);
    mpz_clear(g);
    mpz_clear(a);
